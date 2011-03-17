@@ -17,7 +17,7 @@ describe Rack::Geo do
     Harness.new
   end
 
-  let :empty_stack do
+  let :geostack do
     Geolib::GeoStack.new({})
   end
 
@@ -29,24 +29,23 @@ describe Rack::Geo do
     end
   end
 
-  describe "for a GET request with no Geo cookie set" do
+  describe "A first time visitor" do
     before(:each) do
-      Geolib::GeoStack.stubs(:from_hash).returns(empty_stack)
-      empty_stack.stubs(:to_hash).returns({'GEOSTACK' => 'ENCODED'})
+      Geolib::GeoStack.stubs(:new_from_ip).returns(geostack)
+      geostack.stubs(:to_hash).returns({'GEOSTACK' => 'ENCODED'})
     end
 
-    it "should attempt to use Geo IP to locate the user" do
-      Geolib::GeoStack.expects(:from_hash).with({:ip_address => '127.0.0.1'}).returns(empty_stack)
+    it "should be given a new geostack based on ip address" do
+      Geolib::GeoStack.expects(:new_from_ip).with('127.0.0.1').returns(geostack)
       get "/"
     end
 
-
-    context "after the request has hit the app" do
+    context "and rack-geo" do
       before(:each) do
         get "/"
       end
 
-      it "add a Geo header to the env for apps further down the chain" do
+      it "should add a Geo header to the env for apps further down the chain" do
         harness.env.should have_key('HTTP_X_ALPHAGOV_GEO')
         Utils.decode_stack(harness.env['HTTP_X_ALPHAGOV_GEO']).should == {'GEOSTACK' => 'ENCODED'}
       end
@@ -58,31 +57,31 @@ describe Rack::Geo do
     end
   end
 
-  describe "for a GET request with a Geo cookie set" do
+  describe "A returning visitor" do
     before(:each) do
       current_session.set_cookie("geo=#{Utils.encode_stack({'geo' => 'stack'})}")
     end
 
-    it "should create a GeoStack using the cookie" do
-      Geolib::GeoStack.expects(:from_hash).with do |stack|
+    it "should be given a geostack from their cookie, on get request" do
+      Geolib::GeoStack.expects(:new_from_hash).with do |stack|
         stack['geo'].should == 'stack'
-      end.returns(empty_stack)
+      end.returns(geostack)
       get "/"
     end
 
-    it "should not attempt to use Geo IP to locate the user" do
-      Geolib::GeoStack.expects(:from_hash).with do |stack|
-        !stack.has_key?(:ip_address)
-      end.returns(empty_stack)
-      get "/"
+    it "should be given a geostack from their cookie, on post request" do
+      Geolib::GeoStack.expects(:new_from_hash).with do |stack|
+        stack['geo'].should == 'stack'
+      end.returns(geostack)
+      post "/"
     end
 
-    context "after the request has hit the app" do
+    context "and rack-geo" do
       before(:each) do
         get "/"
       end
 
-      it "add a Geo header to the env for apps further down the chain" do
+      it "should add a Geo header to the env for apps further down the chain" do
         harness.env.should have_key('HTTP_X_ALPHAGOV_GEO')
         JSON.parse(Base64.decode64(harness.env['HTTP_X_ALPHAGOV_GEO'])).should == {'geo' => 'stack'}
       end
@@ -94,24 +93,32 @@ describe Rack::Geo do
     end
   end
 
-  describe "for a POST request with a Geo cookie set" do
+  describe "A visitor giving extra geo data" do
     before(:each) do
+      Geolib::GeoStack.stubs(:new_from_hash).with('postcode' => 'W12 7RJ').returns(geostack)
       current_session.set_cookie("geo=#{Utils.encode_stack({'postcode' => 'W12 7RJ'})}")
+      @new_stack = Geolib::GeoStack.new({:dummy_prop => true})      
     end
 
-    context "after the request has hit the app" do
+    it "should be given a geostack updated with new params" do
+      geostack.expects(:update).with('postcode' => 'W1A 1AA').returns(@new_stack)
+      post "/", "postcode" => "W1A 1AA"
+    end
+
+    context "and rack-geo" do
       before(:each) do
+        geostack.stubs(:update).with('postcode' => 'W1A 1AA').returns(@new_stack)
         post "/", "postcode" => "W1A 1AA"
       end
 
-      it "add a Geo header to the env for apps further down the chain" do
+      it "should add a Geo header to the env for apps further down the chain" do
         harness.env.should have_key('HTTP_X_ALPHAGOV_GEO')
-        Utils.decode_stack(harness.env['HTTP_X_ALPHAGOV_GEO']).should == {'postcode' => 'W1A 1AA'}
+        harness.env['HTTP_X_ALPHAGOV_GEO'].should == Utils.encode_stack(@new_stack.to_hash)
       end
 
-      it "should update the Geo cookie in the response" do
+      it "should add a Geo cookie to the response" do
         last_response_cookies.should have_key('geo')
-        Utils.decode_stack(last_response_cookies['geo']).should == {'postcode' => 'W1A 1AA'}
+        last_response_cookies['geo'].should == Utils.encode_stack(@new_stack.to_hash)
       end
     end
   end

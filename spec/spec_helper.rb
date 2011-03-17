@@ -40,7 +40,12 @@ class Geolib
     def self.stacks
       @stacks ||= []
     end
-    def self.from_hash(hash)
+
+    def self.new_from_ip(ipaddress)
+      new(:ip_address => '127.0.0.1')
+    end
+
+    def self.new_from_hash(hash)
       instance = new(hash)
       stacks << instance
       instance

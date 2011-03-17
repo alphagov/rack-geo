@@ -17,7 +17,7 @@ module Rack
       geo_stack = extract_geo_info
       if request.post?
         geo_params = request.params.select { |k,v| ['postcode', 'lat', 'lon', 'country', 'nation', 'council', 'ward', 'wmc'].include?(k) }
-        geo_stack.update(geo_params) unless geo_params.empty?
+        geo_stack = geo_stack.update(geo_params) unless geo_params.empty?
       end
 
       encoded_geo = encode_stack(geo_stack.to_hash)
@@ -34,9 +34,9 @@ module Rack
 
     def extract_geo_info
       if has_geo_cookie?
-        return Geolib::GeoStack.from_hash(decode_stack(request.cookies['geo']))
+        return Geolib::GeoStack.new_from_hash(decode_stack(request.cookies['geo']))
       else
-        return Geolib::GeoStack.from_hash(:ip_address => request.ip)
+        return Geolib::GeoStack.new_from_ip(request.ip)
       end
     end
     

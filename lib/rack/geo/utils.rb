@@ -5,7 +5,7 @@ module Rack
   class Geo
     module Utils
       def encode_stack(stack)
-        Base64.encode64(stack.to_json)
+        Base64.strict_encode64(stack.to_json)
       end
       
       def decode_stack(encoded_stack)

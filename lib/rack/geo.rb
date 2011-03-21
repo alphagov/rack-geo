@@ -15,9 +15,10 @@ module Rack
     def call(env)
       @request = Rack::Request.new(env)
       geo_stack = extract_geo_info
-      if request.post?
-        geo_params = request.params.select { |k,v| ['postcode', 'lat', 'lon', 'country', 'nation', 'council', 'ward', 'wmc'].include?(k) }
-        geo_stack = geo_stack.update(geo_params) unless geo_params.empty?
+      # only limited number of parameters count at the minute - postcode and country
+      geo_params = request.params.select { |k,v| ['postcode', 'country' ].include?(k) }
+      unless geo_params.empty?
+        geo_stack = geo_stack.update(geo_params)
       end
 
       encoded_geo = encode_stack(geo_stack.to_hash)

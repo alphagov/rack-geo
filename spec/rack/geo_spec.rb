@@ -59,7 +59,7 @@ describe Rack::Geo do
 
   describe "A returning visitor" do
     before(:each) do
-      current_session.set_cookie("geo=#{Utils.encode_stack({'geo' => 'stack'})}")
+      current_session.set_cookie("geo=#{Utils.encode_stack({'geo' => 'stack'})}; domain=example.org; path=/")
     end
 
     it "should be given a geostack from their cookie, on get request" do
@@ -96,7 +96,7 @@ describe Rack::Geo do
   describe "A visitor giving extra geo data" do
     before(:each) do
       Geolib::GeoStack.stubs(:new_from_hash).with('postcode' => 'W12 7RJ').returns(geostack)
-      current_session.set_cookie("geo=#{Utils.encode_stack({'postcode' => 'W12 7RJ'})}")
+      current_session.set_cookie("geo=#{Utils.encode_stack({'postcode' => 'W12 7RJ'})}; domain=example.org; path=/")
       @new_stack = Geolib::GeoStack.new({:dummy_prop => true})      
     end
 

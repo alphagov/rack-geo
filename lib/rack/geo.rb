@@ -15,7 +15,7 @@ module Rack
     def call(env)
       @request = Rack::Request.new(env)
       geo_stack = extract_geo_info
-      # only limited number of parameters count at the minute - postcode and country
+      # only a limited number of parameters count at the minute - postcode and country
       geo_params = request.params.select { |k,v| ['postcode', 'country' ].include?(k) }
       unless geo_params.empty?
         geo_stack = geo_stack.update(geo_params)
@@ -27,7 +27,7 @@ module Rack
       status, headers, body = @app.call(env)
 
       response = Rack::Response.new(body, status, headers)
-      response.set_cookie('geo', :value => encoded_geo, :path => '/', :domain => request.host)
+      response.set_cookie('geo', encoded_geo)
       response.finish
     end
 

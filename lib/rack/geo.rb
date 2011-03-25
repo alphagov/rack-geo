@@ -27,7 +27,7 @@ module Rack
       status, headers, body = @app.call(env)
 
       response = Rack::Response.new(body, status, headers)
-      response.set_cookie('geo', encoded_geo)
+      response.set_cookie('geo', :value => encoded_geo, :path => '/', :domain => 'alphagov.co.uk')
       response.finish
     end
 

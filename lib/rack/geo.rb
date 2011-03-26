@@ -27,7 +27,10 @@ module Rack
       status, headers, body = @app.call(env)
 
       response = Rack::Response.new(body, status, headers)
-      response.set_cookie('geo', encoded_geo)
+      geo_cookie = {:value => encoded_geo}
+      # geo_cookie.merge!(:domain => '.alphagov.co.uk', :path => '/') if ENV['RACK_ENV'] == 'production'
+      geo_cookie.merge!(:domain => 'matt.alphagov.co.uk', :path => '/')
+      response.set_cookie('geo', geo_cookie)
       response.finish
     end
 

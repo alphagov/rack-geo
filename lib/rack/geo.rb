@@ -29,7 +29,7 @@ module Rack
         geo_stack = extract_geo_info
         
         # only limited number of parameters count at the minute - postcode and country
-        geo_params = request.params.select { |k,v| ['postcode', 'country' ].include?(k) }
+        geo_params = request.params.select { |k,v| ['lon', 'lat', 'postcode', 'country' ].include?(k) }
         unless geo_params.empty?
           geo_stack = geo_stack.update(geo_params)
         end

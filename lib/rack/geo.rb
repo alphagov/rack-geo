@@ -25,9 +25,7 @@ module Rack
       
       if request.params['reset_geo']
         geo_stack = Geolib::GeoStack.new_from_ip(request.ip)
-        puts "RESETTING STACK"
       else
-        puts "EXTRACTING STACK"
         geo_stack = extract_geo_info
         
         # only limited number of parameters count at the minute - postcode and country

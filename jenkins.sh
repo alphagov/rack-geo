@@ -1,4 +1,5 @@
 #!/bin/bash -x
 source '/usr/local/lib/rvm'
-bundle install --path "/home/jenkins/bundles/${JOB_NAME}" --deployment
-bundle exec rake spec
+export GEM_HOME="/home/jenkins/bundles/${JOB_NAME}"
+mkdir -p "${GEM_HOME}"
+bundle install && bundle exec rake spec

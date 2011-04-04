@@ -22,4 +22,8 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
 
   s.add_dependency 'rack', '~> 1.2.0'
+  s.add_development_dependency 'rake', '~> 0.8.0'
+  s.add_development_dependency 'rack-test', '~> 0.5.0'
+  s.add_development_dependency 'rspec', '~> 2.5.0'
+  s.add_development_dependency 'mocha', '~> 0.9.0'
 end

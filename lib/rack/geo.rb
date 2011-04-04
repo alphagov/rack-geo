@@ -12,13 +12,27 @@ module Rack
       @app = app
     end
 
+    def pass_thru(env)
+       @app.call(env)
+    end
+
     def call(env)
       @request = Rack::Request.new(env)
-      geo_stack = extract_geo_info
-      # only a limited number of parameters count at the minute - postcode and country
-      geo_params = request.params.select { |k,v| ['postcode', 'country' ].include?(k) }
-      unless geo_params.empty?
-        geo_stack = geo_stack.update(geo_params)
+      
+      if request.path =~ /\.png$|\.css$|\.jpeg$|\.jpg$|\/javascript\//
+        return pass_thru(env)
+      end
+      
+      if request.params['reset_geo']
+        geo_stack = Geolib::GeoStack.new_from_ip(request.ip)
+      else
+        geo_stack = extract_geo_info
+        
+        # only limited number of parameters count at the minute - postcode and country
+        geo_params = request.params.select { |k,v| ['lon', 'lat', 'postcode', 'country' ].include?(k) }
+        unless geo_params.empty?
+          geo_stack = geo_stack.update(geo_params)
+        end
       end
 
       encoded_geo = encode_stack(geo_stack.to_hash)
@@ -42,7 +56,7 @@ module Rack
     end
     
     def has_geo_cookie?
-      request.cookies.has_key?('geo')
+      request.cookies && request.cookies.has_key?('geo')
     end
   end
 end

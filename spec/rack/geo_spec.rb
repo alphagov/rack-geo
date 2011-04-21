@@ -122,4 +122,27 @@ describe Rack::Geo do
       end
     end
   end
+
+  describe "An app hitting /locator.json" do
+    before(:each) do
+      @new_stack = Geolib::GeoStack.new_from_hash({:fuzzy_point => {'lat' => '0', 'lon' => '0', 'accuracy' => :planet}, :friendly_name => 'Test'})
+      Geolib::GeoStack.stubs(:new_from_ip).returns(@new_stack)
+    end
+
+    it "should return a JSON object" do
+      post "/locator.json", :postcode => "W1A 1AA"
+      JSON.parse(last_response.body).should == {'current_location' => {'lat' => '0', 'lon' => '0', 'locality' => 'Test', 'postcode' => 'W1A 1AA'}}
+    end
+
+    it "should return the cookie" do
+      post "/locator.json", :postcode => "W1A 1AA"
+      last_response_cookies.should have_key('geo')
+      last_response_cookies['geo'].should == Utils.encode_stack(@new_stack.to_hash)
+    end
+
+    it "should not call the harness" do
+      harness.expects(:call).never
+      post "/locator.json", :postcode => "W1A 1AA"
+    end
+  end
 end

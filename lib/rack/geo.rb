@@ -1,6 +1,7 @@
 require 'rack/request'
 require 'rack/response'
 require 'rack/geo/utils'
+require 'json'
 
 module Rack
   class Geo
@@ -18,34 +19,60 @@ module Rack
 
     def call(env)
       @request = Rack::Request.new(env)
-      
+
       if request.path =~ /\.png$|\.css$|\.jpeg$|\.jpg$|\/javascript\//
         return pass_thru(env)
       end
-      
-      if request.params['reset_geo']
+
+      geo_stack = process_geo_params(request.params)
+      encoded_geo = encode_stack(geo_stack.to_hash)
+
+      if request.path =~ /locator\.json$/
+        return generate_response(
+          200, 
+          {'Content-Type' => 'application/json; charset=utf-8'}, 
+          {'current_location' => generate_simple_geo_hash(geo_stack.to_hash, request.params)}.to_json, 
+          encoded_geo
+        )
+      end
+      env['HTTP_X_ALPHAGOV_GEO'] = encoded_geo
+
+      status, headers, body = @app.call(env)
+      generate_response(status, headers, body, encoded_geo)
+    end
+
+    private
+
+    def process_geo_params(params)
+      if params['reset_geo']
         geo_stack = Geolib::GeoStack.new_from_ip(request.ip)
       else
         geo_stack = extract_geo_info
-        
+
         # only limited number of parameters count at the minute - postcode and country
-        geo_params = request.params.select { |k,v| ['lon', 'lat', 'postcode', 'country' ].include?(k) }
+        geo_params = params.select { |k,v| ['lon', 'lat', 'postcode', 'country' ].include?(k) }
         unless geo_params.empty?
           geo_stack = geo_stack.update(geo_params)
         end
       end
-
-      encoded_geo = encode_stack(geo_stack.to_hash)
-      env['HTTP_X_ALPHAGOV_GEO'] = encoded_geo
-
-      status, headers, body = @app.call(env)
-
-      response = Rack::Response.new(body, status, headers)
-      response.set_cookie('geo', {:value => encoded_geo, :domain => '.alphagov.co.uk', :path => '/'})
-      response.finish
+      geo_stack
     end
 
-    private
+    def generate_simple_geo_hash(geo_stack_hash, params)
+      simple_geo_hash = {
+        :lat      => geo_stack_hash[:fuzzy_point]['lat'], 
+        :lon      => geo_stack_hash[:fuzzy_point]['lon'], 
+        :locality => geo_stack_hash[:friendly_name]
+      }
+      simple_geo_hash[:postcode] = params['postcode'] if params.has_key?('postcode')
+      simple_geo_hash
+    end
+
+    def generate_response(status, headers, body, encoded_geo_stack)
+      response = Rack::Response.new(body, status, headers)
+      response.set_cookie('geo', {:value => encoded_geo_stack, :domain => '.alphagov.co.uk', :path => '/'})
+      response.finish
+    end
 
     def extract_geo_info
       if has_geo_cookie?

@@ -31,14 +31,15 @@ module Rack
         return generate_response(
           200, 
           {'Content-Type' => 'application/json; charset=utf-8'}, 
-          {'current_location' => generate_simple_geo_hash(geo_stack.to_hash, request.params)}.to_json, 
+          {'current_location' => generate_simple_geo_hash(geo_stack.to_hash, request.params)}.to_json,
+          request.host,
           encoded_geo
         )
       end
       env['HTTP_X_ALPHAGOV_GEO'] = encoded_geo
 
       status, headers, body = @app.call(env)
-      generate_response(status, headers, body, encoded_geo)
+      generate_response(status, headers, body, request.host, encoded_geo)
     end
 
     private
@@ -68,9 +69,9 @@ module Rack
       simple_geo_hash
     end
 
-    def generate_response(status, headers, body, encoded_geo_stack)
+    def generate_response(status, headers, body, request_host, encoded_geo_stack)
       response = Rack::Response.new(body, status, headers)
-      response.set_cookie('geo', {:value => encoded_geo_stack, :domain => '.alphagov.co.uk', :path => '/'})
+      response.set_cookie('geo', {:value => encoded_geo_stack, :domain => cookie_domain_from_host(request_host), :path => '/'})
       response.finish
     end
 

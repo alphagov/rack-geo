@@ -26,4 +26,14 @@ describe Rack::Geo::Utils do
       utils.decode_stack(utils.encode_stack({'key' => 'value'*64})).should == {'key' => 'value'*64}
     end
   end
+  
+  describe "figuring out what the sensible cookie domain should be" do
+    it "returns .alpha.gov.uk given an alpha.gov.uk request" do
+      utils.cookie_domain_from_host('alpha.gov.uk').should == '.alpha.gov.uk'
+    end
+
+    it "returns .alphagov.co.uk given an x.alphagov.gov.uk request" do
+      utils.cookie_domain_from_host('production.alphagov.co.uk').should == '.alphagov.co.uk'
+    end
+  end
 end

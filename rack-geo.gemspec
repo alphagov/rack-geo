@@ -1,10 +1,10 @@
 # -*- encoding: utf-8 -*-
 Gem::Specification.new do |s|
   s.name        = "rack-geo"
-  s.version     = "0.0.1"
+  s.version     = "0.6.0"
   s.platform    = Gem::Platform::RUBY
   s.authors     = ["Matt Patterson"]
-  s.email       = ["matt@reprocessed.org"]
+  s.email       = ["matt@alphagov.co.uk"]
   s.homepage    = "http://github.com/alphagov/rack-geo"
   s.summary     = %q{Geo-providing Rack middleware}
   s.description = %q{Geo-providing Rack middleware}

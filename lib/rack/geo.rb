@@ -28,10 +28,15 @@ module Rack
       encoded_geo = encode_stack(geo_stack.to_hash)
 
       if request.path =~ /locator\.json$/
+        if geo_stack.fuzzy_point.accuracy == :planet
+          response_hash = {'location_error' => generate_geo_error_hash(request.params)}
+        else
+          response_hash = {'current_location' => generate_simple_geo_hash(geo_stack.to_hash, request.params)}
+        end
         return generate_response(
           200, 
           {'Content-Type' => 'application/json; charset=utf-8'}, 
-          {'current_location' => generate_simple_geo_hash(geo_stack.to_hash, request.params)}.to_json,
+          response_hash.to_json,
           request.host,
           encoded_geo
         )
@@ -69,6 +74,12 @@ module Rack
       simple_geo_hash
     end
 
+    def generate_geo_error_hash(params)
+      geo_error_hash = {}
+      geo_error_hash[:postcode] = params['postcode'] if params.has_key?('postcode')
+      geo_error_hash
+    end
+
     def generate_response(status, headers, body, request_host, encoded_geo_stack)
       response = Rack::Response.new(body, status, headers)
       response.set_cookie('geo', {:value => encoded_geo_stack, :domain => cookie_domain_from_host(request_host), :path => '/'})
@@ -79,7 +90,8 @@ module Rack
       if has_geo_cookie?
         return Geolib::GeoStack.new_from_hash(decode_stack(request.cookies['geo']))
       else
-        return Geolib::GeoStack.new_from_ip(request.ip)
+        stack = Geolib::GeoStack.new_from_ip(request.ip)
+        return stack
       end
     end
     

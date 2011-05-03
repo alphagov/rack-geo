@@ -34,33 +34,3 @@ class Harness
     [200, {}, "body"]
   end
 end
-
-class Geolib
-  class GeoStack
-    def self.stacks
-      @stacks ||= []
-    end
-
-    def self.new_from_ip(ipaddress)
-      new(:ip_address => '127.0.0.1')
-    end
-
-    def self.new_from_hash(hash)
-      instance = new(hash)
-      stacks << instance
-      instance
-    end
-
-    def initialize(hash)
-      @hash = hash
-    end
-
-    def to_hash
-      @hash
-    end
-
-    def update(hash)
-      @hash.merge!(hash)
-    end
-  end
-end

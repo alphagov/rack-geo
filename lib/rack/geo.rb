@@ -68,7 +68,10 @@ module Rack
       simple_geo_hash = {
         :lat      => geo_stack_hash[:fuzzy_point]['lat'], 
         :lon      => geo_stack_hash[:fuzzy_point]['lon'], 
-        :locality => geo_stack_hash[:friendly_name]
+        :locality => geo_stack_hash[:friendly_name],
+        :ward     => geo_stack_hash[:ward],
+        :council  => geo_stack_hash[:council],
+        :councils => geo_stack_hash[:ward]+geo_stack_hash[:council],
       }
       simple_geo_hash[:postcode] = params['postcode'] if params.has_key?('postcode')
       simple_geo_hash

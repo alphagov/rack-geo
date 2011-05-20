@@ -27,20 +27,10 @@ module Rack
       geo_stack = process_geo_params(request.params)
       encoded_geo = encode_stack(geo_stack.to_hash)
 
-      if request.path =~ /locator\.json$/
-        if geo_stack.fuzzy_point.accuracy == :planet
-          response_hash = {'location_error' => generate_geo_error_hash(request.params)}
-        else
-          response_hash = {'current_location' => generate_simple_geo_hash(geo_stack.to_hash, request.params)}
-        end
-        return generate_response(
-          200, 
-          {'Content-Type' => 'application/json; charset=utf-8'}, 
-          response_hash.to_json,
-          request.host,
-          encoded_geo
-        )
+      if request.path =~ /locator\.(json|html)$/
+        return handle_geo_lookup($1, geo_stack, encoded_geo, env)
       end
+
       env['HTTP_X_ALPHAGOV_GEO'] = encoded_geo
 
       status, headers, body = @app.call(env)
@@ -48,6 +38,26 @@ module Rack
     end
 
     private
+
+    def handle_geo_lookup(format, geo_stack, encoded_geo, env)
+      if geo_stack.fuzzy_point.accuracy == :planet
+        response_hash = {'location_error' => generate_geo_error_hash(request.params)}
+      else
+        response_hash = {'current_location' => generate_simple_geo_hash(geo_stack.to_hash, request.params)}
+      end
+      
+      response_pieces = [request.host, encoded_geo]
+
+      case format
+      when 'json'
+        response_pieces = [200, {'Content-Type' => 'application/json; charset=utf-8'}, response_hash.to_json] + response_pieces
+      else
+        location = "#{env['rack.url_scheme']}://#{env['HTTP_HOST']}/set-my-location"
+        response_pieces = [302, {'Content-Type' => 'text','Location' => location}, ['302 found']] + response_pieces
+      end
+      
+      return generate_response(*response_pieces)
+    end
 
     def process_geo_params(params)
       if params['reset_geo']

@@ -124,13 +124,13 @@ describe Rack::Geo do
     end
   end
 
-  describe "An app hitting /locator.json" do
+  describe "An app hitting /locator.*" do
     before(:each) do
       @new_stack = Geolib::GeoStack.new_from_hash({'fuzzy_point' => {'lat' => '51.0', 'lon' => '0.0', 'accuracy' => :ward}, 'friendly_name' => 'Test'})
       Geolib::GeoStack.stubs(:new_from_ip).returns(@new_stack)
     end
 
-    context "successfully" do
+    context "successfully with JSON" do
       it "should return a JSON object containing the lat, lon, name, and postcode" do
         post "/locator.json", :postcode => "W1A 1AA"
         result = JSON.parse(last_response.body)
@@ -151,6 +151,15 @@ describe Rack::Geo do
         post "/locator.json", :postcode => "W1A 1AA"
       end
     end
+    
+    context "successfully with HTML" do
+      it "should redirect back to the set location page" do
+        post "/locator.html", :postcode => "W1A 1AA"
+        last_response.should be_redirect
+        last_response.headers['Location'].should == "http://example.org/set-my-location"
+      end
+    end
+
     context "with a duff postcode" do
       it "should return a JSON object containing the duff postcode and an error" do
         post "/locator.json", :postcode => "W1A 1ABC"

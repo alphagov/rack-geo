@@ -17,10 +17,12 @@ module Rack
        @app.call(env)
     end
 
+    COMMON_STATIC_PATHS = %r{\.png$|\.css$|\.jpeg$|\.jpg$|/javascript/}
+
     def call(env)
       @request = Rack::Request.new(env)
 
-      if request.path =~ /\.png$|\.css$|\.jpeg$|\.jpg$|\/javascript\//
+      if request.path =~ COMMON_STATIC_PATHS
         return pass_thru(env)
       end
 
@@ -31,7 +33,7 @@ module Rack
         return handle_geo_lookup($1, geo_stack, encoded_geo, env)
       end
 
-      env['HTTP_X_ALPHAGOV_GEO'] = encoded_geo
+      env['HTTP_X_GOVGEO_STACK'] = encoded_geo
 
       status, headers, body = @app.call(env)
       generate_response(status, headers, body, request.host, encoded_geo)
@@ -61,7 +63,7 @@ module Rack
 
     def process_geo_params(params)
       if params['reset_geo']
-        geo_stack = Geolib::GeoStack.new_from_ip(request.ip)
+        geo_stack = Geogov::GeoStack.new_from_ip(request.ip)
       else
         geo_stack = extract_geo_info
 
@@ -104,9 +106,9 @@ module Rack
 
     def extract_geo_info
       if has_geo_cookie?
-        return Geolib::GeoStack.new_from_hash(decode_stack(request.cookies['geo']))
+        return Geogov::GeoStack.new_from_hash(decode_stack(request.cookies['geo']))
       else
-        stack = Geolib::GeoStack.new_from_ip(request.ip)
+        stack = Geogov::GeoStack.new_from_ip(request.ip)
         return stack
       end
     end

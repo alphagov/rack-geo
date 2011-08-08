@@ -14,7 +14,7 @@ describe Rack::Geo do
   end
 
   before(:each) do
-    @geostack = Geolib::GeoStack.new_from_hash({'fuzzy_point' => {'lat' => 0, 'lon' => 0, 'accuracy' => :planet}})
+    @geostack = Geogov::GeoStack.new_from_hash({'fuzzy_point' => {'lat' => 0, 'lon' => 0, 'accuracy' => :planet}})
   end
 
   let :harness do
@@ -31,12 +31,12 @@ describe Rack::Geo do
 
   describe "A first time visitor" do
     before(:each) do
-      Geolib::GeoStack.stubs(:new_from_ip).returns(@geostack)
+      Geogov::GeoStack.stubs(:new_from_ip).returns(@geostack)
       @geostack.stubs(:to_hash).returns({'GEOSTACK' => 'ENCODED'})
     end
 
     it "should be given a new geostack based on ip address" do
-      Geolib::GeoStack.expects(:new_from_ip).with('127.0.0.1').returns(@geostack)
+      Geogov::GeoStack.expects(:new_from_ip).with('127.0.0.1').returns(@geostack)
       get "/"
     end
 
@@ -46,8 +46,8 @@ describe Rack::Geo do
       end
 
       it "should add a Geo header to the env for apps further down the chain" do
-        harness.env.should have_key('HTTP_X_ALPHAGOV_GEO')
-        Utils.decode_stack(harness.env['HTTP_X_ALPHAGOV_GEO']).should == {'GEOSTACK' => 'ENCODED'}
+        harness.env.should have_key('HTTP_X_GOVGEO_STACK')
+        Utils.decode_stack(harness.env['HTTP_X_GOVGEO_STACK']).should == {'GEOSTACK' => 'ENCODED'}
       end
 
       it "should add a Geo cookie to the response" do
@@ -64,14 +64,14 @@ describe Rack::Geo do
     end
 
     it "should be given a geostack from their cookie, on get request" do
-      Geolib::GeoStack.stubs(:new_from_hash).with do |stack|
+      Geogov::GeoStack.stubs(:new_from_hash).with do |stack|
         stack['postcode'].should == 'w1a 1'
       end.returns(@geostack)
       get "/"
     end
 
     it "should be given a geostack from their cookie, on post request" do
-      Geolib::GeoStack.stubs(:new_from_hash).with do |stack|
+      Geogov::GeoStack.stubs(:new_from_hash).with do |stack|
         stack['postcode'].should == 'w1a 1'
       end.returns(@geostack)
       post "/"
@@ -83,8 +83,8 @@ describe Rack::Geo do
       end
 
       it "should add a Geo header to the env for apps further down the chain" do
-        harness.env.should have_key('HTTP_X_ALPHAGOV_GEO')
-        JSON.parse(Base64.decode64(harness.env['HTTP_X_ALPHAGOV_GEO'])).should == @stack_hash
+        harness.env.should have_key('HTTP_X_GOVGEO_STACK')
+        JSON.parse(Base64.decode64(harness.env['HTTP_X_GOVGEO_STACK'])).should == @stack_hash
       end
 
       it "should add a Geo cookie to the response" do
@@ -96,8 +96,8 @@ describe Rack::Geo do
 
   describe "A visitor giving extra geo data" do
     before(:each) do
-      @new_stack = Geolib::GeoStack.new_from_hash({'fuzzy_point' => {'lat' => 0, 'lon' => 0, 'accuracy' => :planet}})
-      Geolib::GeoStack.stubs(:new_from_hash).with('postcode' => 'W12 7RJ').returns(@geostack)
+      @new_stack = Geogov::GeoStack.new_from_hash({'fuzzy_point' => {'lat' => 0, 'lon' => 0, 'accuracy' => :planet}})
+      Geogov::GeoStack.stubs(:new_from_hash).with('postcode' => 'W12 7RJ').returns(@geostack)
       current_session.set_cookie("geo=#{Utils.encode_stack({'postcode' => 'W12 7RJ'})}; domain=example.org; path=/")
     end
 
@@ -113,8 +113,8 @@ describe Rack::Geo do
       end
 
       it "should add a Geo header to the env for apps further down the chain" do
-        harness.env.should have_key('HTTP_X_ALPHAGOV_GEO')
-        harness.env['HTTP_X_ALPHAGOV_GEO'].should == Utils.encode_stack(@new_stack.to_hash)
+        harness.env.should have_key('HTTP_X_GOVGEO_STACK')
+        harness.env['HTTP_X_GOVGEO_STACK'].should == Utils.encode_stack(@new_stack.to_hash)
       end
 
       it "should add a Geo cookie to the response" do
@@ -126,8 +126,8 @@ describe Rack::Geo do
 
   describe "An app hitting /locator.*" do
     before(:each) do
-      @new_stack = Geolib::GeoStack.new_from_hash({'fuzzy_point' => {'lat' => '51.0', 'lon' => '0.0', 'accuracy' => :ward}, 'friendly_name' => 'Test'})
-      Geolib::GeoStack.stubs(:new_from_ip).returns(@new_stack)
+      @new_stack = Geogov::GeoStack.new_from_hash({'fuzzy_point' => {'lat' => '51.0', 'lon' => '0.0', 'accuracy' => :ward}, 'friendly_name' => 'Test'})
+      Geogov::GeoStack.stubs(:new_from_ip).returns(@new_stack)
     end
 
     context "successfully with JSON" do

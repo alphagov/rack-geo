@@ -1,3 +1,4 @@
+require 'geogov'
 require 'rack/request'
 require 'rack/response'
 require 'rack/geo/utils'
@@ -21,6 +22,11 @@ module Rack
 
     def call(env)
       @request = Rack::Request.new(env)
+
+      if request.path == "/javascripts/geo.js"
+        public_dir = ::File.dirname(__FILE__)+"/../../public"
+        return Rack::File.new(public_dir).call(env)
+      end
 
       if request.path =~ COMMON_STATIC_PATHS
         return pass_thru(env)
@@ -100,7 +106,9 @@ module Rack
 
     def generate_response(status, headers, body, request_host, encoded_geo_stack)
       response = Rack::Response.new(body, status, headers)
-      response.set_cookie('geo', {:value => encoded_geo_stack, :domain => cookie_domain_from_host(request_host), :path => '/'})
+      response.set_cookie('geo', {:value => encoded_geo_stack, 
+                                  :domain => cookie_domain_from_host(request_host), 
+                                  :path => '/'})
       response.finish
     end
 

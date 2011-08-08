@@ -1,0 +1,145 @@
+<html>
+
+<head>
+  <style>
+  .hidden {display:none;}
+  </style>
+  
+  <script src="http://assets0.alpha.gov.uk/javascript/jquery-1.5.1.min.js" type="text/javascript" charset="utf-8"></script>
+  <script src="http://assets1.alpha.gov.uk/javascript/jquery.base64.js" type="text/javascript" charset="utf-8"></script>
+  <script type="text/javascript" src="/javascripts/geo.js"></script>
+  <script>
+  
+$(document).ready(function() {
+      
+    $('#global-locator-form').locator ({
+        ignore_location_known_on_page_load: true, 
+        error_area_selector: '#global-locator-error'
+    });
+
+    var show_known_location = function(current_location) {
+      //show correct message
+      $('#location-set-message').show();
+      $('#location-unset-message').hide();
+      $("#location-name").html(current_location.locality);
+    };
+    
+    var show_unknown_location = function() {
+      var location_dom = $("#global-user-location");
+            
+      location_dom.addClass('removing');
+      location_dom.removeClass('set');
+      $("#location-name").html("");
+      //show correct message
+      $('#location-set-message').hide();
+      $('#location-unset-message').show();
+
+      //delete cookie
+    }
+    
+    var open_location_dialog = function() {
+      $('#global-locator').show();
+      $('#global-locator-form').trigger('reset-locator-form');
+    };
+    
+    $('#global-locator .close').click(function() {
+      $('#global-locator').hide();
+      return false;
+    });
+
+    // Event handlers
+    $('#global-user-location .change-location').click(function() {
+      open_location_dialog();
+      return false;
+    });
+    
+    $('#global-user-location .explain-location').click(function() {
+      open_location_dialog();
+      return false;
+    });
+    
+    $('#forget-location').click(function() {
+      $(document).trigger('location-removed');
+      $('#global-locator').hide();
+      return false;
+    });
+       
+    $(document).bind('location-removed', function(e, message) {
+      show_unknown_location();
+      AlphaGeo.deleteGeoCookie();
+    });
+    
+    $(document).bind('location-known', function(e, data) {
+      $("#global-user-location").addClass('set');
+      
+      show_known_location(data.current_location);
+    });
+    
+    $(document).bind('location-changed', function(e, data) {
+      $('#global-locator').hide();
+      $("#global-user-location").addClass('set');
+
+      show_known_location(data.current_location);
+    });
+    
+    var located = AlphaGeo.locationName();
+    if (located) {
+      $(document).trigger('location-known', {current_location: AlphaGeo.locator_object()});    
+    } else {
+      show_unknown_location();
+    }
+  });
+  </script>
+</head>
+
+<body>
+    <div id="global-user-location">
+            <p id="location-set-message">
+                <span class="pin"><img src="http://assets0.alpha.gov.uk/images/index/global-user-location-icon_set-highlight.png" alt="Location set" title="Location icon (set)"></span>
+                <span id="location-set-info">Your location is set to <a href="#" id="location-notifications"><strong id="location-name"></strong> <img src="http://assets1.alpha.gov.uk/images/notify.png" alt="4" title="4 notifications"></a> | <a class="change-location" href="#">Change location</a> (<a class="explain-location" href="#">what is this?</a>)</span>
+            </p>
+            <p id="location-unset-message">
+                <span class="pin"><img src="http://assets1.alpha.gov.uk/images/index/global-user-location-icon_unset-highlight.png" alt="Location not set" title="Location icon (not set)"></span>
+                Location not set. <a class="change-location" href="#">Set location</a> (<a class="explain-location" href="#">why?</a>)
+            </p>
+   </div>
+   
+   
+   <div id="global-app-error" class="app-error hidden"></div>
+   
+   <div id="global-locator" class="popover-mask hidden">
+      <div id="global-locator-box" class="popover">
+           <div class="header">
+             <img class="logo" src="http://assets1.alpha.gov.uk/images/welcome/logo.png/f2f54f6bY.png" width="110" height="50" alt="alpha.gov.uk" title="alpha.gov.uk logo"><a class="close" href="#"><img src="http://assets1.alpha.gov.uk/images/welcome/close.png/140e18e4Y.png" alt="close"></a>
+           </div>
+           <div id="global-set-location">
+             <h2>Set your location</h2>
+             <div id="global-locator-error" class="app-error hidden"></div>
+             <form id="global-locator-form" class="app-form" action="/locator.json">
+               <fieldset class="postcode">
+   <label class="legend" for="postcode_box">Enter a UK postcode</label>
+                 <div class="ask_location">
+                   <div>
+                     <input name="postcode" type="text" value="" placeholder="e.g. SW1A 2AA"><input type="submit" name="find_me" value="Go">
+   </div>
+                 </div>
+                 <div class="finding_location hidden">
+                   <p>Locating you…
+                     <input type="hidden" name="lon" value=""><input type="hidden" name="lat" value=""></p>
+                 </div>
+                 <p id="forget-location">
+                   <a class="form-button" href="#">Forget my location</a>
+                 </p>
+               </fieldset>
+   </form>
+             <div class="article-text">
+               <h4>Why?</h4>
+               <p>When you set your location we can give you details of services local to you, such as Passport offices, driving test centres or police stations, so you can complete any tasks and be away from your computer as quickly as possible.</p>
+               <p>Your approximate location is stored in a cookie on your machine, but we do not save your postcode or precise location on our servers.</p>
+             </div>
+           </div>
+         </div>
+       </div>
+</body>
+
+</html>

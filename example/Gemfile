@@ -3,4 +3,5 @@ source :rubygems
 gem 'sinatra', '>= 1.0'
 gem 'rake'
 gem 'rack-geo', :path => '../../rack-geo'
+gem 'slimmer', :git => "git@github.com:alphagov/slimmer.git"
 gem 'capybara'

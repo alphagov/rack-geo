@@ -1,5 +1,7 @@
 require File.join(File.dirname(__FILE__), 'councils')
-require 'rack/geo'
+
+require "bundler"
+Bundler.require(:default, ENV['RACK_ENV'])
 
 set :run, false
 
@@ -9,4 +11,10 @@ $stdout.reopen(log)
 $stderr.reopen(log)
 
 use Rack::Geo
+
+static_dir = "../../static/public"
+
+use Rack::Static, :urls => ["/stylesheets","/javascripts", "/images","/templates"], :root => static_dir
+use Slimmer::App, :template_host => static_dir + "/templates"
+
 run Sinatra::Application

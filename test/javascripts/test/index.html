@@ -22,7 +22,27 @@
 	<h2 id="qunit-banner"></h2>
 	<div id="qunit-testrunner-toolbar"></div>
 	<h2 id="qunit-userAgent"></h2>
+	<form id="global-locator-form" class="app-form" action="/locator.json">
+	<fieldset class="postcode">
+	<label class="legend" for="postcode_box">Enter a UK postcode</label>
+	<div class="ask_location">
+	<div>
+	<input type="text" placeholder="e.g. SW1A 2AA" value="" name="postcode">
+	<input type="submit" value="Go" name="find_me">
+	</div>
+	<p class="locate-me">
+	or
+	<a href="#">locate me automatically</a>
+	</p>
+	</div>
+	<div class="finding_location hidden">
+	<p id="forget-location">
+	</fieldset>
+	</form>
 	<ol id="qunit-tests"></ol>
-	<div id="qunit-fixture">test markup</div>
+	<div id="qunit-fixture">
+		
+		
+	</div>
 </body>
 </html>

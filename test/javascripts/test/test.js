@@ -7,18 +7,51 @@ Get localised nearest in-borough
 Updates to HTML (mark-up, classes)
 Event handlers
 */
+AlphaGeo.locate('#global-locator-form', "stuff");
 
-test("Check API calls with no params", 6, function(){
-	equals(AlphaGeo.readAndParseJSONCookie(), false,"readAndParseJSONCookie");
+test("Check API calls with no params on AlphaGeo", 7, function(){
+	equal(AlphaGeo.readAndParseJSONCookie(), false,"readAndParseJSONCookie");
 	equal(AlphaGeo.locationName(), null, "locationName");
-	equal(AlphaGeo.councils(), true, "councils");
-	equal(AlphaGeo.locationCoords(), true, "locationCoords");
+	
+
+
+	equal(AlphaGeo.councils(), null, "councils");
+
+	equal(AlphaGeo.locationCoords(), false, "locationCoords");
 	equal(AlphaGeo.locator_object(), true, "locator_object");
 	equal(AlphaGeo.deleteGeoCookie(), true, "deleteGeoCookie");
 	
+	equal(AlphaGeo.locate(), true, "locate");
 });
 
-test("json check", 3, function() {
+test("Check locator plugin API", 1, function(){
+	
+	stop()
+	/*	var actual = $('#global-locator-form').locator ({
+          	ignore_location_known_on_page_load: false, 
+          	error_area_selector: '#global-locator-error'
+      	});
+
+
+	console.log(actual);*/
+	$(document).ready(function(){
+		start();
+	});
+	
+	equal(AlphaGeo.locate('#global-locator-form'), true, "locator")
+
+	/*
+	remove_existing_location_data
+	show_known_location
+	show_unknown_location
+	open_location_dialog
+	load_new_locations
+	*/
+	
+});
+
+test("json call check", 3, function() {
+
 	
 });
 

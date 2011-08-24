@@ -125,13 +125,14 @@ var AlphaGeo = {
 	/**
 		@name AlphaGeo.locate
 		@function
-		@description Based on Matt Patterson's Alphagov Locator jQuery plugin
+		@description Based on Matt Patterson's original Alphagov Locator jQuery plugin.  This has various features for setting up a location widget.
 
 		@param String id Selector ID for the element containing the location feature widget (Can be the form ID or the container)
 		@param {Object} [opts] Options.
 			Options
 			@param ignoreKnown Set to false if you want to ignore the known value if it has been set, on page load
 			@param errorSelector A selector where error messages will be shown
+			@param noJSSubmit Set to false if you would prefer to reload the page and not use JS to retrieve and set the value when clicking submit
 
 		@returns false
 
@@ -227,7 +228,7 @@ var AlphaGeo = {
 	        show_ui(locating_ui);
 	      });
 	      geolocate_ui.bind('location-failed', function () {
-	        $(this).text('We were not able to locate you.');
+	        $(id).text('We were not able to locate you.');
 	        show_ui(ask_ui);
 	      });
 	      geolocate_ui.bind('location-completed', function (event, details) {

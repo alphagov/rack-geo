@@ -126,13 +126,14 @@ var AlphaGeo = {
 		@name AlphaGeo.locate
 		@function
 		@description Based on Matt Patterson's original Alphagov Locator jQuery plugin.  This has various features for setting up a location widget.
+			This feature is expecting to find a container with at least a form element containing within it 
 
 		@param String id Selector ID for the element containing the location feature widget (Can be the form ID or the container)
 		@param {Object} [opts] Options.
 			Options
-			@param ignoreKnown Set to false if you want to ignore the known value if it has been set, on page load
-			@param errorSelector A selector where error messages will be shown
-			@param noJSSubmit Set to false if you would prefer to reload the page and not use JS to retrieve and set the value when clicking submit
+			@param boolean ignoreKnown Set to false if you want to ignore the known value if it has been set, on page load. 
+			@param String errorSelector A selector where error messages will be shown. Default will be "#global-app-error"
+			@param boolean noJSSubmit Set to false if you would prefer to reload the page and not use JS to retrieve and set the value when clicking submit
 
 		@returns false
 
@@ -156,17 +157,23 @@ var AlphaGeo = {
 			found_ui = locator_box.find('.found_location'),	
 			all_ui = ask_ui.add(locating_ui).add(found_ui),
 			geolocate_ui;
-		
 			
+			
+			/* offer the auto locate if the geo api in browser was found */
 	    var setup_geolocation_api_ui = function() {
 	      var geolocation_ui_node = ask_ui.find('.locate-me');
 	      if (geolocation_ui_node.length > 0) return geolocation_ui_node;
 	      return $('<p class="locate-me">or <a href="#">locate me automatically</a></p>').appendTo(ask_ui);
 	    };
+	
+			/* display results */ 
 	    var show_ui = function(ui_to_show) {
+				console.log(ui_to_show)
 	      all_ui.addClass('hidden');
 	      ui_to_show.removeClass('hidden');
 	    };
+	
+			/* set geo labels */
 	    var update_geo_labels = function(geo_data) {
 	      if (geo_data.councils && geo_data.councils.length > 0) {  
 	        display_name = Alphagov.get_display_place_name(geo_data.locality, geo_data.councils[geo_data.councils.length - 1].name);
@@ -176,14 +183,21 @@ var AlphaGeo = {
 	      found_ui.find('h3').text(display_name);
 	      found_ui.find('a').text('Not in ' + geo_data.locality + '?');
 	    };
+	
+			/* set geo lat/long */
 	    var update_geo_fields = function(geo_data) {
 	      locator_box.find('input[name=lat]').val(geo_data.lat);
 	      locator_box.find('input[name=lon]').val(geo_data.lon);
 	    };
+	
+			/* clear any already set geo fields */
 	    var clear_geo_fields = function() {
 	      locator_box.find('input[name=lat]').val('');
 	      locator_box.find('input[name=lon]').val('');
 	    };
+	
+	
+			/* this checks the response we're getting back */
 	    var dispatch_location = function(response_data) {
 	      if (response_data.current_location === undefined || !response_data.current_location) {
 	        $(error_area_selector).empty().append("<p>Please enter a valid UK postcode.</p>").removeClass('hidden');
@@ -217,15 +231,22 @@ var AlphaGeo = {
 
 	    // Check to see if we're starting located
 	    locator_box.data('located', !found_ui.hasClass('hidden'))
-	    // Locator setup
-	    found_ui.find('a').click(function (e) {
-	      $(document).trigger('location-removed');
-	      e.preventDefault();
-	    });
-	    if (navigator.geolocation) {
+	  
+			
+			/* event for clicks on links in .found_location ? (probably forget location link?) */
+			found_ui.find('a').click(function (e) {
+				$(document).trigger('location-removed');
+				e.preventDefault();
+			});
+	    
+			/* use geo location api for auto-detection, if available in the browser */
+			if (navigator.geolocation) {
+				console.log(navigator.geolocation)
 	      var geolocate_ui = setup_geolocation_api_ui();
+	
+	
 	      geolocate_ui.bind('location-started', function () {
-	        show_ui(locating_ui);
+					show_ui(locating_ui);
 	      });
 	      geolocate_ui.bind('location-failed', function () {
 	        $(id).text('We were not able to locate you.');
@@ -276,6 +297,9 @@ var AlphaGeo = {
 	    locator_box.bind('check-locator-form-state', function() {
 	      show_ui(locator_box.data('located') ? found_ui : ask_ui);
 	    });
+	
+	
+			/* if we don't have a geo api in the browser, or the user just wants to submit on the form anyway, we want to submit the form and get back the json that way */
 	    locator_form.submit(function(e) {
 	      clear_geo_fields();
 	      if (!noJSSUbmit) {
@@ -286,6 +310,22 @@ var AlphaGeo = {
 	    });
 	  
 
+	},
+	
+	/**
+		@name AlphaGeo.forgetLocation
+		@function
+		@description Use to remove all references to the locality.  Removes the cookie and resets the forms.
+
+		@returns true
+
+		@example
+			AlphaGeo.forgetLocation()
+	*/
+	
+	//
+	forgetLocation: function(){
+		
 	},
 	
 	/**

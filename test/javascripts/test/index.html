@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8" />
+	<title>geolocate</title>
+	<link rel="stylesheet" href="../qunit/qunit.css" type="text/css" media="screen">
+	<!--jquery - TODO: update this to use the ones in static-->
+	<script type="text/javascript" charset="utf-8" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
+	  <script type="text/javascript" src="../../../../static/public/javascripts/jquery.base64.js" charset="utf-8"></script>
+	
+	<!--what we're testing-->
+	<script type="text/javascript" src="../../../../static/public/javascripts/core.js"></script>
+	<script type="text/javascript" src="../../../public/javascripts/geo.js"></script>
+	
+	<script type="text/javascript" src="../../../../static/public/javascripts/jquery.mustache.js"></script>
+	<!--test runners-->
+	<script type="text/javascript" src="../qunit/qunit.js"></script>
+	<script type="text/javascript" src="test.js"></script>
+</head>
+<body>
+	<h1 id="qunit-header">geolocate tests</h1>
+	<h2 id="qunit-banner"></h2>
+	<div id="qunit-testrunner-toolbar"></div>
+	<h2 id="qunit-userAgent"></h2>
+	<form id="global-locator-form" class="app-form" action="/locator.json">
+	<fieldset class="postcode">
+	<label class="legend" for="postcode_box">Enter a UK postcode</label>
+	<div class="ask_location">
+	<div>
+	<input type="text" placeholder="e.g. SW1A 2AA" value="" name="postcode">
+	<input type="submit" value="Go" name="find_me">
+	</div>
+	<p class="locate-me">
+	or
+	<a href="#">locate me automatically</a>
+	</p>
+	</div>
+	<div class="finding_location hidden">
+	<p id="forget-location">
+	</fieldset>
+	</form>
+	<ol id="qunit-tests"></ol>
+	<div id="qunit-fixture">
+		
+		
+	</div>
+</body>
+</html>

@@ -1,1 +1,1 @@
-rvm --create 1.9.2@rack-geo
+rvm use 1.9.2

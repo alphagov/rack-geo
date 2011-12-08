@@ -115,12 +115,11 @@ module Rack
 
     def extract_geo_info
       if has_geo_cookie?
-        return Geogov::GeoStack.new_from_hash(decode_stack(request.cookies['geo']))
+        Geogov::GeoStack.new_from_hash(decode_stack(request.cookies['geo']))
       elsif @auto_geoip_lookup
-        stack = Geogov::GeoStack.new_from_ip(request.ip)
-        return stack
+        Geogov::GeoStack.new_from_ip(request.ip)
       else
-        stack = Geogov::GeoStack.new
+        Geogov::GeoStack.new
       end
     end
     

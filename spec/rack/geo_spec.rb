@@ -31,12 +31,12 @@ describe Rack::Geo do
 
   describe "A first time visitor" do
     before(:each) do
-      Geogov::GeoStack.stubs(:new_from_ip).returns(@geostack)
+      Geogov::GeoStack.stubs(:new).returns(@geostack)
       @geostack.stubs(:to_hash).returns({'GEOSTACK' => 'ENCODED'})
     end
 
-    it "should be given a new geostack based on ip address" do
-      Geogov::GeoStack.expects(:new_from_ip).with('127.0.0.1').returns(@geostack)
+    it "should not be given a new geostack based on ip address" do
+      Geogov::GeoStack.expects(:new_from_ip).never
       get "/"
     end
 
@@ -151,7 +151,7 @@ describe Rack::Geo do
         post "/locator.json", :postcode => "W1A 1AA"
       end
     end
-    
+
     context "successfully with HTML" do
       it "should redirect back to the set location page" do
         post "/locator.html", :postcode => "W1A 1AA"

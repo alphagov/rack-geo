@@ -24,7 +24,7 @@ module Rack
     def call(env)
       @request = Rack::Request.new(env)
 
-      if request.path == "/javascripts/geo.js"
+      if request.path == "/javascripts/rack-geo.js"
         public_dir = ::File.dirname(__FILE__)+"/../../public"
         return Rack::File.new(public_dir).call(env)
       end

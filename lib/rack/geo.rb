@@ -10,8 +10,9 @@ module Rack
 
     attr_reader :request
 
-    def initialize(app)
+    def initialize(app, options = {})
       @app = app
+      @auto_geoip_lookup = options.has_key?(:auto_geoip_lookup)
     end
 
     def pass_thru(env)
@@ -115,9 +116,11 @@ module Rack
     def extract_geo_info
       if has_geo_cookie?
         return Geogov::GeoStack.new_from_hash(decode_stack(request.cookies['geo']))
-      else
+      elsif @auto_geoip_lookup
         stack = Geogov::GeoStack.new_from_ip(request.ip)
         return stack
+      else
+        stack = Geogov::GeoStack.new
       end
     end
     

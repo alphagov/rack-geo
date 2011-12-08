@@ -9,3 +9,5 @@ RSpec::Core::RakeTask.new :spec
 spec = Gem::Specification.load('rack-geo.gemspec')
 Rake::GemPackageTask.new(spec) do
 end
+
+task :default => :spec

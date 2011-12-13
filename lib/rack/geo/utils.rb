@@ -13,7 +13,11 @@ module Rack
       end
 
       def cookie_domain_from_host(request_host)
-        '.' + request_host.split('.').reverse[0..2].reverse.join('.')
+        if ENV['RAILS_ENV'] == 'development'
+          '.dev.gov.uk'
+        else
+          '.' + request_host.split('.').reverse[0..2].reverse.join('.')
+        end
       end
     end
   end

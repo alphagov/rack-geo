@@ -124,7 +124,8 @@ module Rack
     end
     
     def has_geo_cookie?
-      request.cookies && request.cookies.has_key?('geo')
+      false
+      #request.cookies && request.cookies.has_key?('geo')
     end
   end
 end

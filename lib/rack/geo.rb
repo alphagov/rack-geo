@@ -122,10 +122,9 @@ module Rack
         Geogov::GeoStack.new
       end
     end
-    
+
     def has_geo_cookie?
-      false
-      #request.cookies && request.cookies.has_key?('geo')
+      request.cookies && request.cookies.has_key?('geo')
     end
   end
 end

@@ -107,9 +107,6 @@ module Rack
 
     def generate_response(status, headers, body, request_host, encoded_geo_stack)
       response = Rack::Response.new(body, status, headers)
-      response.set_cookie('geo', {:value => encoded_geo_stack, 
-                                  :domain => cookie_domain_from_host(request_host), 
-                                  :path => '/'})
       response.finish
     end
 

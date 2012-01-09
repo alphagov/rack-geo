@@ -63,11 +63,11 @@ describe Rack::Geo do
     end
 
     context "successfully with JSON" do
-      it "should return a JSON object containing the lat, lon, name, and postcode" do
+      it "should return a JSON object containing the lat, lon, and name" do
         post "/locator.json", :postcode => "W1A 1AA"
         result = JSON.parse(last_response.body)
         result.should have_key('current_location')
-        ['lat', 'lon', 'locality', 'postcode'].each do |key|
+        ['lat', 'lon', 'locality'].each do |key|
           result['current_location'].should have_key(key)
         end
       end
@@ -92,9 +92,9 @@ describe Rack::Geo do
     end
 
     context "with a duff postcode" do
-      it "should return a JSON object containing the duff postcode and an error" do
+      it "should return a JSON object containing an error" do
         post "/locator.json", :postcode => "W1A 1ABC"
-        JSON.parse(last_response.body).should == {'location_error' => {'postcode' => 'W1A 1ABC'}}
+        JSON.parse(last_response.body).should == {'location_error' => true}
       end
     end
   end

@@ -50,7 +50,7 @@ module Rack
 
     def handle_geo_lookup(format, geo_stack, encoded_geo, env)
       if geo_stack.fuzzy_point.accuracy == :planet
-        response_hash = {'location_error' => generate_geo_error_hash(request.params)}
+        response_hash = {'location_error' => true}
       else
         response_hash = {'current_location' => generate_simple_geo_hash(geo_stack.to_hash, request.params)}
       end
@@ -95,14 +95,7 @@ module Rack
         :council  => geo_stack_hash[:council],
         :councils => councils,
       }
-      simple_geo_hash[:postcode] = params['postcode'] if params.has_key?('postcode')
       simple_geo_hash
-    end
-
-    def generate_geo_error_hash(params)
-      geo_error_hash = {}
-      geo_error_hash[:postcode] = params['postcode'] if params.has_key?('postcode')
-      geo_error_hash
     end
 
     def generate_response(status, headers, body, request_host, encoded_geo_stack)

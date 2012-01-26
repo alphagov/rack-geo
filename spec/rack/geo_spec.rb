@@ -91,6 +91,11 @@ describe Rack::Geo do
       end
     end
 
+    it "should return 400 Bad Request to a GET request" do
+      get "/locator.json", :postcode => "W1A 1AA"
+      last_response.status.should == 400
+    end
+
     context "with a duff postcode" do
       it "should return a JSON object containing an error" do
         post "/locator.json", :postcode => "W1A 1ABC"

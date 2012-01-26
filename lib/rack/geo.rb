@@ -37,7 +37,11 @@ module Rack
       encoded_geo = encode_stack(geo_stack.to_hash)
 
       if request.path =~ /locator\.(json|html)$/
-        return handle_geo_lookup($1, geo_stack, encoded_geo, env)
+        if request.request_method == "GET"
+          return [400, {"Content-Type" => "text/plain"}, ["GET geolocation requests are not allowed"]]
+        else
+          return handle_geo_lookup($1, geo_stack, encoded_geo, env)
+        end
       end
 
       env['HTTP_X_GOVGEO_STACK'] = encoded_geo

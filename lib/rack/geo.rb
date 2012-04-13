@@ -98,6 +98,7 @@ module Rack
         :ward     => geo_stack_hash[:ward],
         :council  => geo_stack_hash[:council],
         :councils => councils,
+        :nation   => geo_stack_hash[:nation]
       }
       simple_geo_hash
     end

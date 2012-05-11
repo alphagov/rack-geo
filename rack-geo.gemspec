@@ -1,7 +1,7 @@
 # -*- encoding: utf-8 -*-
 Gem::Specification.new do |s|
   s.name        = "rack-geo"
-  s.version     = "0.8.6"
+  s.version     = "0.8.7"
   s.platform    = Gem::Platform::RUBY
   s.authors     = ["Matt Patterson", "Ben Griffiths", "James Stewart"]
   s.email       = ["matt@alphagov.co.uk", "ben@alphagov.co.uk", "jystewart@gmail.com"]
@@ -29,4 +29,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'rack-test'
   s.add_development_dependency 'rspec', '~> 2.5.0'
   s.add_development_dependency 'mocha', '~> 0.9.0'
+  s.add_development_dependency 'gem_publisher', '~> 1.0.0'
+  s.add_development_dependency 'gemfury'
 end

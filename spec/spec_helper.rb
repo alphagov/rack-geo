@@ -28,7 +28,7 @@ end
 
 class Harness
   attr_reader :env
-  
+
   def call(env)
     @env = env.dup
     [200, {}, "body"]

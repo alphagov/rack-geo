@@ -1,7 +1,7 @@
 Rack::Geo
 =========
 
-Simple Rack middleware which processes incoming requests and adds, updates, 
+Simple Rack middleware which processes incoming requests and adds, updates,
 and passes through as a Header, Geo-location information
 
                                 ______________

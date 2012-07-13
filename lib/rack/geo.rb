@@ -10,6 +10,8 @@ module Rack
 
     attr_reader :request
 
+    COMMON_STATIC_PATHS = %r{\.png$|\.css$|\.jpeg$|\.jpg$|/javascript/}
+
     def initialize(app, options = {})
       @app = app
       @auto_geoip_lookup = options.has_key?(:auto_geoip_lookup)
@@ -18,8 +20,6 @@ module Rack
     def pass_thru(env)
        @app.call(env)
     end
-
-    COMMON_STATIC_PATHS = %r{\.png$|\.css$|\.jpeg$|\.jpg$|/javascript/}
 
     def call(env)
       @request = Rack::Request.new(env)
@@ -58,7 +58,7 @@ module Rack
       else
         response_hash = {'current_location' => generate_simple_geo_hash(geo_stack.to_hash, request.params)}
       end
-      
+
       response_pieces = [request.host, encoded_geo]
 
       case format
@@ -68,7 +68,7 @@ module Rack
         location = "#{env['rack.url_scheme']}://#{env['HTTP_HOST']}/set-my-location"
         response_pieces = [302, {'Content-Type' => 'text','Location' => location}, ['302 found']] + response_pieces
       end
-      
+
       return generate_response(*response_pieces)
     end
 
@@ -92,8 +92,8 @@ module Rack
       councils = councils + geo_stack_hash[:ward] if geo_stack_hash[:ward]
       councils = councils + geo_stack_hash[:council] if geo_stack_hash[:council]
       simple_geo_hash = {
-        :lat      => geo_stack_hash[:fuzzy_point]['lat'], 
-        :lon      => geo_stack_hash[:fuzzy_point]['lon'], 
+        :lat      => geo_stack_hash[:fuzzy_point]['lat'],
+        :lon      => geo_stack_hash[:fuzzy_point]['lon'],
         :locality => geo_stack_hash[:friendly_name],
         :ward     => geo_stack_hash[:ward],
         :council  => geo_stack_hash[:council],
@@ -115,6 +115,5 @@ module Rack
         Geogov::GeoStack.new
       end
     end
-
   end
 end
